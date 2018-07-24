@@ -15,6 +15,7 @@ export function login(req, res, next) {
     // logIn()) that can be used to establish a login session
     return req.logIn(user, (loginErr) => {
       if (loginErr) return res.sendStatus(401);
+      if (user.allowedAccess) res.sendStatus(401);
       return res.sendStatus(200);
     });
   })(req, res, next);
@@ -38,7 +39,9 @@ export function signUp(req, res, next) {
     password: req.body.password
   });
 
-  User.findOne({ email: req.body.email }, (findErr, existingUser) => {
+  User.findOne({
+    email: req.body.email
+  }, (findErr, existingUser) => {
     if (existingUser) {
       return res.sendStatus(409);
     }
