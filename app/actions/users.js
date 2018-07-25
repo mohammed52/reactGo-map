@@ -4,7 +4,9 @@ import { authService } from '../services';
 import * as types from '../types';
 
 function beginLogin() {
-  return { type: types.MANUAL_LOGIN_USER };
+  return {
+    type: types.MANUAL_LOGIN_USER
+  };
 }
 
 function loginSuccess(message) {
@@ -29,7 +31,9 @@ function signUpError(message) {
 }
 
 function beginSignUp() {
-  return { type: types.SIGNUP_USER };
+  return {
+    type: types.SIGNUP_USER
+  };
 }
 
 function signUpSuccess(message) {
@@ -40,19 +44,27 @@ function signUpSuccess(message) {
 }
 
 function beginLogout() {
-  return { type: types.LOGOUT_USER};
+  return {
+    type: types.LOGOUT_USER
+  };
 }
 
 function logoutSuccess() {
-  return { type: types.LOGOUT_SUCCESS_USER };
+  return {
+    type: types.LOGOUT_SUCCESS_USER
+  };
 }
 
 function logoutError() {
-  return { type: types.LOGOUT_ERROR_USER };
+  return {
+    type: types.LOGOUT_ERROR_USER
+  };
 }
 
 export function toggleLoginMode() {
-  return { type: types.TOGGLE_LOGIN_MODE };
+  return {
+    type: types.TOGGLE_LOGIN_MODE
+  };
 }
 
 export function manualLogin(data) {
@@ -61,11 +73,19 @@ export function manualLogin(data) {
 
     return authService().login(data)
       .then((response) => {
-          dispatch(loginSuccess('You have been successfully logged in'));
-          dispatch(push('/'));
+        dispatch(loginSuccess('You have been successfully logged in'));
+        dispatch(push('/'));
       })
       .catch((err) => {
-        dispatch(loginError('Oops! Invalid username or password'));
+        console.log("err", err);
+        console.log("err.response.status", err.response.status);
+        if (err.response.status == 402) {
+
+          dispatch(loginError('Account verification pending!'));
+        } else {
+
+          dispatch(loginError('Oops! Invalid username or password'));
+        }
       });
   };
 }
@@ -76,11 +96,15 @@ export function signUp(data) {
 
     return authService().signUp(data)
       .then((response) => {
-          dispatch(signUpSuccess('You have successfully registered an account!'));
-          dispatch(push('/'));
+        dispatch(signUpSuccess('You have successfully registered an account!'));
+        dispatch(push('/'));
       })
       .catch((err) => {
-        dispatch(signUpError('Oops! Something went wrong when signing up'));
+        if (err.response.status == 403) {
+          dispatch(signUpError('Account Created and is pending verification'))
+        } else {
+          dispatch(signUpError('Oops! Something went wrong when signing up'));
+        }
       });
   };
 }
@@ -91,7 +115,7 @@ export function logOut() {
 
     return authService().logOut()
       .then((response) => {
-          dispatch(logoutSuccess());
+        dispatch(logoutSuccess());
       })
       .catch((err) => {
         dispatch(logoutError());
